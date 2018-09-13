@@ -490,34 +490,17 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
             
             //asset.image_fullsize = result;
             
-            NSString * filePath;
-            do {
-                filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, docCount++, @"jpg"];
-            } while ([fileMgr fileExistsAtPath:filePath]);
-            
             fetch_item.be_saving_img = true;
+
+            fetch_item.image_fullsize = info[@"PHImageFileURLKey"];
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                
-                
-                // @BVL: Added orientation-fix to correctly display the returned result
-                
-//              if ( ![ UIImageJPEGRepresentation(result, 1.0f ) writeToFile:filePath atomically:YES ] ) {
-//                  return;
-//              }
-                
                 NSLog(@"original orientation: %ld",(UIImageOrientation)result.imageOrientation);
                 
                 UIImage *imageToDisplay = result.fixOrientation; //  UIImage+fixOrientation extension
                 
                 NSLog(@"corrected orientation: %ld",(UIImageOrientation)imageToDisplay.imageOrientation);
 
-                // setting compression to a low value (high compression) impact performance, but not actual img quality
-                if ( ![ UIImageJPEGRepresentation(imageToDisplay, 0.2f ) writeToFile:filePath atomically:YES ] ) {
-                    return;
-                }
-                
-                fetch_item.image_fullsize = filePath;
                 fetch_item.be_saving_img = false;
                 
                 dispatch_async(dispatch_get_main_queue(), ^{
