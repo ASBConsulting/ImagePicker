@@ -518,33 +518,15 @@ public class MultiImageChooserActivity extends AppCompatActivity implements
                 while (i.hasNext()) {
                     Entry<String, Integer> imageInfo = i.next();
                     File file = new File(imageInfo.getKey());
-                    int rotate = imageInfo.getValue();
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inSampleSize = 1;
-                    options.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-                    int width = options.outWidth;
-                    int height = options.outHeight;
-                    float scale = calculateScale(width, height);
+                    if (outputType == OutputType.FILE_URI) {
+                        al.add(Uri.fromFile(file).toString());
+                    } else if (outputType == OutputType.BASE64_STRING) {
+                        int rotate = imageInfo.getValue();
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inSampleSize = 1;
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 
-                    if (scale < 1) {
-                        int finalWidth = (int)(width * scale);
-                        int finalHeight = (int)(height * scale);
-                        int inSampleSize = calculateInSampleSize(options, finalWidth, finalHeight);
-                        options = new BitmapFactory.Options();
-                        options.inSampleSize = inSampleSize;
-
-                        try {
-                            bmp = this.tryToGetBitmap(file, options, rotate, true);
-                        } catch (OutOfMemoryError e) {
-                            options.inSampleSize = calculateNextSampleSize(options.inSampleSize);
-                            try {
-                                bmp = this.tryToGetBitmap(file, options, rotate, false);
-                            } catch (OutOfMemoryError e2) {
-                                throw new IOException("Unable to load image into memory.");
-                            }
-                        }
-                    } else {
                         try {
                             bmp = this.tryToGetBitmap(file, null, rotate, false);
                         } catch(OutOfMemoryError e) {
@@ -564,13 +546,7 @@ public class MultiImageChooserActivity extends AppCompatActivity implements
                                 }
                             }
                         }
-                    }
 
-                    if (outputType == OutputType.FILE_URI) {
-                        file = storeImage(bmp, file.getName());
-                        al.add(Uri.fromFile(file).toString());
-
-                    } else if (outputType == OutputType.BASE64_STRING) {
                         al.add(getBase64OfImage(bmp));
                     }
                 }
