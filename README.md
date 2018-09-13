@@ -1,3 +1,6 @@
+Fork of cordova-plugin-telerik-imagepicker 
+------------------------------------------
+
 cordova-imagePicker
 ===================
 
