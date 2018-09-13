@@ -1,5 +1,5 @@
 {
-  "version": "2.2.3",
+  "version": "2.2.4",
   "name": "cordova-plugin-asb-imagepicker",
   "cordova_name": "ImagePicker",
   "description": "Fork of cordova-plugin-telerik-imagepicker. This plugin allows selection of multiple images from the camera roll / gallery in a phonegap app",

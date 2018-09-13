@@ -492,7 +492,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
             
             fetch_item.be_saving_img = true;
 
-            fetch_item.image_fullsize = info[@"PHImageFileURLKey"];
+            fetch_item.image_fullsize = [info[@"PHImageFileURLKey"] absoluteString];
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 NSLog(@"original orientation: %ld",(UIImageOrientation)result.imageOrientation);
