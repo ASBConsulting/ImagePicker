@@ -455,51 +455,79 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
         
         PHImageRequestOptions *ph_options = [[PHImageRequestOptions alloc] init];
         
+        [ ph_options setVersion:PHImageRequestOptionsVersionOriginal];
+
         [ ph_options setNetworkAccessAllowed:YES];
-        
+
+        [ ph_options setResizeMode:PHImageRequestOptionsResizeModeNone];
+
         // @BVL Set Deliverymode, in order to return highest quality
         [ ph_options setDeliveryMode: PHImageRequestOptionsDeliveryModeHighQualityFormat ]; // Best Quality
 
         [ ph_options setProgressHandler:^(double progress, NSError *error, BOOL *stop, NSDictionary *info) {
-            
+
             fetch_item.percent = progress;
-            
+
             GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-            
+
             if ( cell ) {
                 [ cell set_progress:progress animated:false];
             }
-            
+
         }];
-        
-        
-            
-        [ self.imageManager requestImageForAsset:asset targetSize:PHImageManagerMaximumSize contentMode:PHImageContentModeDefault options:ph_options resultHandler:^(UIImage *result, NSDictionary *info) {
-            
+
+        [ self.imageManager requestImageDataForAsset:asset options:ph_options resultHandler:^(NSData * _Nullable imageData, NSString * _Nullable dataUTI, UIImageOrientation orientation, NSDictionary * _Nullable info) {
+
             //dispatch_async(dispatch_get_main_queue(), ^{
-            
+
             GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-            
+
             if ( cell ) {
                 [cell hide_progress];
                 [cell show_fetching];
             }
-            
+
             fetch_item.be_progressed = false;
             fetch_item.be_finished = true;
-            
-            //asset.image_fullsize = result;
-            
+
+            // asset.image_fullsize = result;
+
+            NSString * filePath;
+            NSString * extension;
+
+            if([[info[@"PHImageFileURLKey"] pathExtension] length] > 0){
+                extension = [info[@"PHImageFileURLKey"] pathExtension];
+            }else {
+                extension = @"jpg";
+            }
+
+            do {
+                filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, docCount++, extension];
+            } while ([fileMgr fileExistsAtPath:filePath]);
+
             fetch_item.be_saving_img = true;
 
-            fetch_item.image_fullsize = [info[@"PHImageFileURLKey"] absoluteString];
-            
+
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSLog(@"original orientation: %ld",(UIImageOrientation)result.imageOrientation);
-                
-                UIImage *imageToDisplay = result.fixOrientation; //  UIImage+fixOrientation extension
-                
-                NSLog(@"corrected orientation: %ld",(UIImageOrientation)imageToDisplay.imageOrientation);
+                // Fix JPEG rotation
+                if( [dataUTI isEqualToString:@"public.jpeg"]){
+                    UIImage* image = [UIImage imageWithData:imageData];
+                    NSLog(@"original orientation: %ld",(UIImageOrientation)image.imageOrientation);
+                    image = image.fixOrientation;
+                    NSLog(@"corrected orientation: %ld",(UIImageOrientation)image.imageOrientation);
+
+                    // save fixed jpeg
+                    if (! [UIImageJPEGRepresentation(image, 1.0f ) writeToFile:filePath atomically:true]){
+                        return;
+                    }
+                }else{
+                    //save non jpeg
+                    if (! [imageData writeToFile:filePath atomically:true]){
+                        return;
+                    }
+                }
+
+                fetch_item.image_fullsize = filePath;
 
                 fetch_item.be_saving_img = false;
                 
