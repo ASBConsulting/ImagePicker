@@ -510,7 +510,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 // Fix JPEG rotation
-                if( [dataUTI isEqualToString:@"public.jpeg"]){
+                if( [dataUTI isEqualToString:@"public.jpeg"] || [dataUTI isEqualToString:@"public.heic"]){
                     UIImage* image = [UIImage imageWithData:imageData];
                     NSLog(@"original orientation: %ld",(UIImageOrientation)image.imageOrientation);
                     image = image.fixOrientation;
