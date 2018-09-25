@@ -360,8 +360,8 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
         [ cell hide_fetching ];
     }
     
-    //NSLog( @" cell : %ld ", (long)indexPath.item );
-    
+    NSLog( @" cell : %ld ", (long)indexPath.item );
+
     /*if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
     {
         NSLog(@"Image manager: Requesting FIT image for iPad");
@@ -370,7 +370,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                                     contentMode:PHImageContentModeAspectFit
                                         options:nil
                                   resultHandler:^(UIImage *result, NSDictionary *info) {
-                                      
+
                                       // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
                                       if (cell.tag == currentTag) {
                                           [cell.imageView setImage:result];
@@ -385,47 +385,40 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                                     contentMode:PHImageContentModeAspectFill
                                         options:nil
                                   resultHandler:^(UIImage *result, NSDictionary *info) {
-                                      
+
                                       // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
                                       if (cell.tag == currentTag) {
                                           [cell.imageView setImage:result];
                                       }
-                                      
+
                                       if ( fetch_item.be_saving_img_thumb==false && fetch_item.image_thumb == nil && result!= nil ) {
-                                          
+
                                           fetch_item.be_saving_img_thumb = true;
-                                          
+
                                           NSString * filePath;
                                           do {
                                               filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_THUMB_PREFIX, doc_thumbCount++, @"jpg"];
                                           } while ([fileMgr fileExistsAtPath:filePath]);
-                                          
+
                                           dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                                              
+
                                               fetch_item.be_saving_img_thumb = false;
-                                            
+
                                               // TODO pass in quality
                                               if ( ![ UIImageJPEGRepresentation(result, 1.0f ) writeToFile:filePath atomically:YES ] ) {
                                                   return;
                                               }
-                                              
+
                                               fetch_item.image_thumb = filePath;
-                                              
+
                                           });
                                       }
-                                      
-                                      /*GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-                                      
-                                      if ( cell ) {
-                                          [cell.imageView setImage:result];
-                                      }
-                                      NSLog( @"%d", indexPath.item );*/
-                                      
+
                                   }];
     }
-    
-    
-    
+
+
+
     return cell;
 }
 
@@ -437,24 +430,24 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     if(self.picker.selectedAssets.count >= self.picker.maximumImagesCount) {
         return NO;
     }
-    
+
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
     //GMFetchItem * fetch_item = [dic_asset_fetches objectForKey:[ NSNumber numberWithLong:indexPath.item ]];
     GMFetchItem * fetch_item = [dic_asset_fetches objectForKey:asset];
-    
+
     GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-    
+
     if ( cell == nil || fetch_item==nil || fetch_item.be_progressed ) {
         return NO;
     }
- 
+
     if ( fetch_item.be_saving_img == false && fetch_item.image_fullsize == nil  ) {
-        
+
         fetch_item.be_progressed = true;
         [ cell show_progress ];
-        
+
         PHImageRequestOptions *ph_options = [[PHImageRequestOptions alloc] init];
-        
+
         [ ph_options setVersion:PHImageRequestOptionsVersionOriginal];
 
         [ ph_options setNetworkAccessAllowed:YES];
@@ -530,11 +523,11 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                 fetch_item.image_fullsize = filePath;
 
                 fetch_item.be_saving_img = false;
-                
+
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    
+
                     GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-                    
+
                     if ( cell ) {
                         [cell hide_fetching];
                     }
@@ -543,16 +536,16 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                     [ collectionView selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone ];
                     [ self collectionView:collectionView didSelectItemAtIndexPath:indexPath ];
                 });
-                
+
             });
             //});
-            
+
         }];
-        
-        
+
+
         return NO;
     }
-    
+
     if (!cell.isEnabled)
         return NO;
     else if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldSelectAsset:)])
@@ -566,10 +559,10 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
     //GMFetchItem * fetch_item = [dic_asset_fetches objectForKey:[ NSNumber numberWithLong:indexPath.item ]];
     GMFetchItem * fetch_item = [dic_asset_fetches objectForKey:asset];
-    
+
     [self.picker selectAsset:asset];
     [self.picker selectFetchItem:fetch_item];
-    
+
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)])
         [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
 }
@@ -577,7 +570,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-    
+
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldDeselectAsset:)])
         return [self.picker.delegate assetsPickerController:self.picker shouldDeselectAsset:asset];
     else
@@ -589,10 +582,10 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
     //GMFetchItem * fetch_item = [dic_asset_fetches objectForKey:[ NSNumber numberWithLong:indexPath.item ]];
     GMFetchItem * fetch_item = [dic_asset_fetches objectForKey:asset];
-    
+
     [self.picker deselectAsset:asset];
     [self.picker deselectFetchItem:fetch_item];
-    
+
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didDeselectAsset:)])
         [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
 }
@@ -600,7 +593,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-    
+
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldHighlightAsset:)])
         return [self.picker.delegate assetsPickerController:self.picker shouldHighlightAsset:asset];
     else
@@ -610,7 +603,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (void)collectionView:(UICollectionView *)collectionView didHighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-    
+
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didHighlightAsset:)])
         [self.picker.delegate assetsPickerController:self.picker didHighlightAsset:asset];
 }
@@ -618,7 +611,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (void)collectionView:(UICollectionView *)collectionView didUnhighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-    
+
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didUnhighlightAsset:)])
         [self.picker.delegate assetsPickerController:self.picker didUnhighlightAsset:asset];
 }
@@ -640,22 +633,22 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 {
     // Call might come on any background queue. Re-dispatch to the main queue to handle it.
     dispatch_async(dispatch_get_main_queue(), ^{
-        
+
         // check if there are changes to the assets (insertions, deletions, updates)
         PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:self.assetsFetchResults];
         if (collectionChanges) {
-            
+
             // get the new fetch result
             self.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
-            
+
             //NSLog( @"reset all" );
-            
+
             UICollectionView *collectionView = self.collectionView;
-            
+
             if (![collectionChanges hasIncrementalChanges] || [collectionChanges hasMoves]) {
                 // we need to reload all if the incremental diffs are not available
                 [collectionView reloadData];
-                
+
             } else {
                 // if we have incremental diffs, tell the collection view to animate insertions and deletions
                 [collectionView performBatchUpdates:^{
@@ -673,7 +666,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                     }
                 } completion:NULL];
             }
-            
+
             [self resetCachedAssets];
         }
     });
@@ -699,19 +692,19 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 {
     BOOL isViewVisible = [self isViewLoaded] && [[self view] window] != nil;
     if (!isViewVisible) { return; }
-    
+
     // The preheat window is twice the height of the visible rect
     CGRect preheatRect = self.collectionView.bounds;
     preheatRect = CGRectInset(preheatRect, 0.0f, -0.5f * CGRectGetHeight(preheatRect));
-    
+
     // If scrolled by a "reasonable" amount...
     CGFloat delta = ABS(CGRectGetMidY(preheatRect) - CGRectGetMidY(self.previousPreheatRect));
     if (delta > CGRectGetHeight(self.collectionView.bounds) / 3.0f) {
-        
+
         // Compute the assets to start caching and to stop caching.
         NSMutableArray *addedIndexPaths = [NSMutableArray array];
         NSMutableArray *removedIndexPaths = [NSMutableArray array];
-        
+
         [self computeDifferenceBetweenRect:self.previousPreheatRect andRect:preheatRect removedHandler:^(CGRect removedRect) {
             NSArray *indexPaths = [self.collectionView aapl_indexPathsForElementsInRect:removedRect];
             [removedIndexPaths addObjectsFromArray:indexPaths];
@@ -719,18 +712,22 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
             NSArray *indexPaths = [self.collectionView aapl_indexPathsForElementsInRect:addedRect];
             [addedIndexPaths addObjectsFromArray:indexPaths];
         }];
-        
+
         NSArray *assetsToStartCaching = [self assetsAtIndexPaths:addedIndexPaths];
         NSArray *assetsToStopCaching = [self assetsAtIndexPaths:removedIndexPaths];
-        
+
+        PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
+        options.synchronous = NO;
+        options.networkAccessAllowed = YES;
+
         [self.imageManager startCachingImagesForAssets:assetsToStartCaching
                                             targetSize:AssetGridThumbnailSize
                                            contentMode:PHImageContentModeAspectFill
-                                               options:nil];
+                                               options:options];
         [self.imageManager stopCachingImagesForAssets:assetsToStopCaching
                                            targetSize:AssetGridThumbnailSize
                                           contentMode:PHImageContentModeAspectFill
-                                              options:nil];
+                                              options:options];
         
         self.previousPreheatRect = preheatRect;
     }
