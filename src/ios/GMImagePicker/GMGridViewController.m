@@ -485,7 +485,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
             // asset.image_fullsize = result;
 
-            NSString * filePath;
+            __block NSString * filePath;
             NSString * extension;
 
             if([[info[@"PHImageFileURLKey"] pathExtension] length] > 0){
@@ -498,6 +498,8 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                 filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, docCount++, extension];
             } while ([fileMgr fileExistsAtPath:filePath]);
 
+            NSLog(filePath);
+
             fetch_item.be_saving_img = true;
 
 
@@ -509,8 +511,16 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                     image = image.fixOrientation;
                     NSLog(@"corrected orientation: %ld",(UIImageOrientation)image.imageOrientation);
 
+                    // make sure it's a jpeg extension
+                    do {
+                        filePath = [NSString stringWithFormat:@"%@/%@%03d.%@.jpg", docsPath, CDV_PHOTO_PREFIX, docCount++, extension];
+                        NSLog(filePath);
+                    } while ([fileMgr fileExistsAtPath:filePath]);
+
                     // save fixed jpeg
-                    if (! [UIImageJPEGRepresentation(image, 1.0f ) writeToFile:filePath atomically:true]){
+                    NSError* error;
+                    if (! [UIImageJPEGRepresentation(image, 1.0f ) writeToFile:filePath options:NSAtomicWrite error:&error]){
+                        NSLog(@"Error: %@ %@", error, [error userInfo]);
                         return;
                     }
                 }else{
